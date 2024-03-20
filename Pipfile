@@ -3,15 +3,12 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
-[[source]]
-url = "https://mirrors.aliyun.com/pypi/simple"
-verify_ssl = true
-name = "aliyun"
-
 [packages]
 pandas = "*"
+matplotlib = "*"
 scikit-learn = "*"
-tensorflow = "*"
+wandb = "*"
+transformers = "*"
 
 [dev-packages]
 
