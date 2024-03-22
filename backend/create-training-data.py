@@ -7,7 +7,8 @@ from pathlib import Path
 # Set up command line argument parsing
 parser = argparse.ArgumentParser(description='Preprocess and split the dataset')
 parser.add_argument('--dataset', type=str, default='datasets/comments.csv', help='Path to the input dataset CSV file')
-parser.add_argument('--test-size', type=float, default=0.1, help='Path to the input dataset CSV file')
+parser.add_argument('--create-splits', action='store_true', help='Should train/test splits be created')
+parser.add_argument('--test-size', type=float, default=0.1, help='If create-splits then how big should the test size be (1.0 = all, default 0.1)')
 args = parser.parse_args()
 
 # Read the CSV file
@@ -27,8 +28,13 @@ funny_0_subset = transformed_df[transformed_df['funny_binary'] == 0].sample(n=mi
 funny_1_subset = transformed_df[transformed_df['funny_binary'] == 1].sample(n=min_count, random_state=42)
 balanced_df = pd.concat([funny_0_subset, funny_1_subset])
 
-# Split the balanced dataset into train and test sets
-train_df, test_df = train_test_split(balanced_df, test_size=args.test_size, random_state=42, stratify=balanced_df['funny_binary'])
+if args.create_splits:
+    # Split the balanced dataset into train and test sets
+    train_df, test_df = train_test_split(balanced_df, test_size=args.test_size, random_state=42, stratify=balanced_df['funny_binary'])
+else:
+    # Use the entire balanced dataset as the train set
+    train_df = balanced_df
+    test_df = None
 
 # Print the count and distribution of funny=0 and funny=1 for each dataset
 print("Train set:")
@@ -37,19 +43,20 @@ print("Distribution:")
 print(train_df['funny_binary'].value_counts(normalize=True))
 print("---")
 
-print("Test set:")
-print(test_df['funny_binary'].value_counts())
-print("Distribution:")
-print(test_df['funny_binary'].value_counts(normalize=True))
-print("---")
+if test_df is not None:
+    print("Test set:")
+    print(test_df['funny_binary'].value_counts())
+    print("Distribution:")
+    print(test_df['funny_binary'].value_counts(normalize=True))
+    print("---")
 
 # Save the resulting files
 output_dir = dataset_path.parent
 train_file = output_dir / f"{dataset_path.stem}-train.csv"
-test_file = output_dir / f"{dataset_path.stem}-test.csv"
-
 train_df.to_csv(train_file, index=False)
-test_df.to_csv(test_file, index=False)
-
 print(f"Train set saved as: {train_file}")
-print(f"Test set saved as: {test_file}")
+
+if test_df is not None:
+    test_file = output_dir / f"{dataset_path.stem}-test.csv"
+    test_df.to_csv(test_file, index=False)
+    print(f"Test set saved as: {test_file}")

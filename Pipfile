@@ -9,6 +9,9 @@ matplotlib = "*"
 scikit-learn = "*"
 wandb = "*"
 transformers = "*"
+datasets = "*"
+torch = "*"
+accelerate = "*"
 
 [dev-packages]
 
